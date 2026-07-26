@@ -2233,7 +2233,11 @@ void __cdecl G_PrepareSaveMemoryForWrite(char commitLevel)
     //Memcard_CheckOngoingTasks();
     if (SaveMemory_IsWaitingForCommit(SaveHandle) && !v3 && (commitLevel & 6) != 0)
         SaveMemory_ForceCommitSave(SaveHandle);
+#ifdef KISAK_XBOX
     if (SaveMemory_IsCurrentCommittedSaveValid() && (commitLevel & 4) != 0 && !SaveMemory_IsWrittenToDevice(SaveHandle))
+#else
+    if (SaveMemory_IsCurrentCommittedSaveValid() && (commitLevel & 6) != 0 && !SaveMemory_IsWrittenToDevice(SaveHandle))
+#endif
         G_WriteCurrentCommitToDevice();
 }
 
@@ -2248,7 +2252,11 @@ int __cdecl G_ProcessCommitActions(const PendingSave *pendingSave, SaveGame *sav
     v4 = 0;
     if ((pendingSave->commitLevel & 2) != 0)
         SaveMemory_ForceCommitSave(save);
+#ifdef KISAK_XBOX
     if ((pendingSave->commitLevel & 4) != 0)
+#else
+    if ((pendingSave->commitLevel & 6) != 0)
+#endif
     {
         //if (pendingSave->saveType != SAVE_TYPE_AUTOSAVE)
         //    MemCard_SetUseDevDrive(1);

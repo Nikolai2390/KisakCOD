@@ -150,7 +150,7 @@ int __cdecl UI_PopupScriptMenu(const char *menuName, bool useMouse);
 void UI_PlayerStart();
 void __cdecl UI_Refresh();
 
-void __cdecl UI_LoadSavegames(int filter);
+void __cdecl UI_LoadSavegames(const char *subdirFilter);
 void __cdecl UI_DelSavegame();
 
 void UI_AddPlayerProfiles();

@@ -285,19 +285,10 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
 	int eqIndex; // [esp+10h] [ebp-4h]
 	float eqWeight[2];
 	float gain;
-	const float eqCap = 0.99f;// Clamp the EQ blend before full interpolation. Overlapping filters become too aggressive.
 
 #ifdef KISAK_SP
-	if (milesGlob.eqLerp >= eqCap)
-	{
-		eqWeight[0] = milesGlob.eqLerp;
-		eqWeight[1] = 0.0f;
-	}
-	else
-	{
-		eqWeight[0] = 0.0f;
-		eqWeight[1] = 1.0f - milesGlob.eqLerp;
-	}
+	eqWeight[0] = milesGlob.eqLerp;
+	eqWeight[1] = 1.0f - milesGlob.eqLerp;
 #else
 	eqWeight[0] = 1.0f;
 	eqWeight[1] = 0.0f;

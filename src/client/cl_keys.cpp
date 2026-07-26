@@ -21,6 +21,7 @@
 #include <cgame/cg_modelpreviewer.h>
 #include "cl_ui.h"
 #include "cl_scrn.h"
+#include <gfx_d3d/r_cinematic.h>
 #endif
 #include <universal/profile.h>
 
@@ -1912,6 +1913,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                         break;
                     case CA_ACTIVE:
                         {
+						if (cl_paused->current.integer || (!R_Cinematic_IsStarted() && !R_Cinematic_IsPending()) || !cg_cinematicFullscreen->current.enabled)
                             UI_SetActiveMenu(localClientNum, UIMENU_INGAME);
                         }
                         break;

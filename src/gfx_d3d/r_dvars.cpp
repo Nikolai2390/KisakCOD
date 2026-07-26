@@ -763,11 +763,19 @@
          DVAR_NOFLAG,
          "Show this many rows of light grid points for the vis cache");
      r_showLightGrid = Dvar_RegisterBool("r_showLightGrid", 0, DVAR_CHEAT, "Show light grid debugging information");
+#ifdef KISAK_MP
      r_showMissingLightGrid = Dvar_RegisterBool(
          "r_showMissingLightGrid",
          true,
          DVAR_NOFLAG,
          "Use rainbow colors for entities that are outside the light grid");
+#elif KISAK_SP
+     r_showMissingLightGrid = Dvar_RegisterBool(
+         "r_showMissingLightGrid",
+         true,
+         DVAR_CHEAT,
+         "Use rainbow colors for entities that are outside the light grid");
+#endif
      r_cacheSModelLighting = Dvar_RegisterBool(
          "r_cacheSModelLighting",
          true,
@@ -1114,11 +1122,19 @@
      minbg.value.min = -1.0f;
      r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0f, minbg, DVAR_CHEAT, "Distance for lowest level of detail");
      r_forceLod = Dvar_RegisterEnum("r_forceLod", r_forceLodNames, 4, DVAR_CHEAT, "Force all level of detail to this level");
+#ifdef KISAK_MP
      r_modelVertColor = Dvar_RegisterBool(
          "r_modelVertColor",
          1,
          0xA0u,
          "Set to 0 to replace all model vertex colors with white when loaded");
+#elif KISAK_SP
+     r_modelVertColor = Dvar_RegisterBool(
+         "r_modelVertColor",
+         1,
+         DVAR_CHEAT | DVAR_LATCH,
+         "Set to 0 to replace all model vertex colors with white when loaded");
+#endif
      sc_enable = Dvar_RegisterBool("sc_enable", false, DVAR_NOFLAG, "Enable shadow cookies");
      sc_blur = Dvar_RegisterInt("sc_blur", 2, (DvarLimits)0x400000000LL, DVAR_CHEAT, "Enable shadow cookie blur");
      sc_count = Dvar_RegisterInt("sc_count", 24, (DvarLimits)0x1800000000LL, DVAR_CHEAT, "Number of shadow cookies");
@@ -1181,7 +1197,11 @@
          minbm,
          DVAR_CHEAT,
          "Shadow cookie off-screen caster level of detail scale");
+#ifdef KISAK_MP
      sm_enable = Dvar_RegisterBool("sm_enable", 1, 1u, "Enable shadow mapping");
+#elif KISAK_SP
+     sm_enable = Dvar_RegisterBool("sm_enable", 1, DVAR_ARCHIVE, "Enable shadow mapping");
+#endif
      sm_sunEnable = Dvar_RegisterBool("sm_sunEnable", 1, DVAR_SAVED | DVAR_CHEAT, "Enable sun shadow mapping from script");
      sm_spotEnable = Dvar_RegisterBool("sm_spotEnable", 1, DVAR_SAVED | DVAR_CHEAT, "Enable spot shadow mapping from script");
      sm_maxLights = Dvar_RegisterInt(

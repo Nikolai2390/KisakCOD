@@ -6,6 +6,9 @@
 
 #ifdef KISAK_XBOX
 static const char *CONSOLE_DEFAULT_SAVE_NAME = "savegame.svg";
+#define SAVEGAME_VERSION 287
+#else
+#define SAVEGAME_VERSION 289
 #endif
 
 void __cdecl Memcard_InitializeSystem(void);

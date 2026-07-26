@@ -5020,6 +5020,9 @@ void __cdecl Actor_Think(gentity_s *self)
     }
 }
 
+#define ACTOR_MAX_DODGE_ATTEMPTS 5
+static int s_actorDodgeAttempts[MAX_ACTORS];
+
 int __cdecl Actor_PhysicsAndDodge(actor_s *self)
 {
     gentity_s *ent; // r11
@@ -5046,6 +5049,8 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
     int wPathLen; // r30
     int v24; // r11
     int wDodgeCount; // r10
+	float baseWishLen; // USEBETTERLOOKAHEAD
+	int maxDodgeTries; // USEBETTERLOOKAHEAD
     float v26[20]; // [sp+50h] [-D0h] BYREF
 
     if (self->eAnimMode != AI_ANIM_MOVE_CODE || !Path_Exists(&self->Path))
@@ -5076,6 +5081,8 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
     iHitEntnum = self->Physics.iHitEntnum;
     if (iHitEntnum == ENTITYNUM_NONE)
     {
+		if (ai_useBetterLookahead->current.enabled)
+			s_actorDodgeAttempts[G_GetActorIndex(self)] = 0;
         result = 1;
         self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
         return result;
@@ -5099,14 +5106,39 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
                 "self->Path.wPathLen - 2 >= self->Path.wNegotiationStartNode");
         v13 = (float *)&self->Physics.iTouchEnts[7 * self->Path.wPathLen + 27];
         v14 = 0;
-        v15 = sqrtf((float)((float)(self->Physics.vWishDelta[0] * self->Physics.vWishDelta[0])
+        baseWishLen = sqrtf((float)((float)(self->Physics.vWishDelta[0] * self->Physics.vWishDelta[0])
             + (float)(self->Physics.vWishDelta[1] * self->Physics.vWishDelta[1])));
+		v15 = baseWishLen;
+		if (ai_useBetterLookahead->current.enabled)
+			maxDodgeTries = ACTOR_MAX_DODGE_ATTEMPTS;
+		else
+			maxDodgeTries = 2;
         while (1)
         {
+			if (ai_useBetterLookahead->current.enabled)
+			{
+				unsigned int actorIdx;
+				int dodgeAttempt;
+				float dodgeIntensity;
+				actorIdx = G_GetActorIndex(self);
+				if (++s_actorDodgeAttempts[actorIdx] > ACTOR_MAX_DODGE_ATTEMPTS)
+					goto LABEL_5;
+				dodgeAttempt = s_actorDodgeAttempts[actorIdx];
+				dodgeIntensity = 1.0f + (float)(dodgeAttempt - 1) * 0.05f;
+				if (dodgeIntensity > 2.5f)
+					dodgeIntensity = 2.5f;
+				v15 = baseWishLen * dodgeIntensity;
+				if (v14 > 0)
+					v15 = (float)((float)v15 * (float)0.75f);
+				maxDodgeTries = 2 + (dodgeAttempt / 20);
+			}
+			else
+			{
+				v15 = (float)((float)v15 * (float)0.75);
+			}
             v16 = (float)(self->Path.vCurrPoint[0] - self->Physics.vHitOrigin[0]);
             v17 = (float)(self->Path.vCurrPoint[1] - self->Physics.vHitOrigin[1]);
             Vec2Normalize(self->Physics.vHitNormal);
-            v15 = (float)((float)v15 * (float)0.75);
             LeftOrRightDodge = (gentityFlags_t)Actor_Physics_GetLeftOrRightDodge(
                 self,
                 (float)(v13[1] * (float)v16) >= (double)(float)(*v13 * (float)v17),
@@ -5129,7 +5161,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
             {
                 if (Actor_IsDodgeEntity(self, self->Physics.iHitEntnum))
                 {
-                    if (++v14 < 2)
+                    if (++v14 < maxDodgeTries)
                         continue;
                 }
             }

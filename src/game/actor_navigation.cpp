@@ -491,33 +491,26 @@ bool __cdecl Path_IsPathStanceNode(const pathnode_t *node)
 
 float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo)
 {
-    double v4; // fp31
-    double v5; // fp12
-    double v6; // fp1
-    float v8; // [sp+50h] [-40h]
+	float fDist;
 
-    v8 = *vTo - *vFrom;
-    *delta = v8;
-    delta[1] = vTo[1] - vFrom[1];
-    if ((LODWORD(v8) & 0x7F800000) == 0x7F800000)
+	*delta = *vTo - *vFrom;
+	delta[1] = vTo[1] - vFrom[1];
+
+    if ((LODWORD(*delta) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 56, 0, "%s", "!IS_NAN(delta[0])");
     if ((COERCE_UNSIGNED_INT(delta[1]) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 57, 0, "%s", "!IS_NAN(delta[1])");
     if (*delta == 0.0 && delta[1] == 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 58, 0, "%s", "delta[0] || delta[1]");
-    v4 = sqrtf((float)((float)(delta[1] * delta[1]) + (float)(*delta * *delta)));
-    if (v4 <= 0.0)
+
+    fDist = Vec2Length(delta);
+    if (fDist <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 60, 0, "%s", "fDist > 0");
-    v5 = delta[1];
-    *delta = *delta * (float)((float)1.0 / (float)v4);
-    delta[1] = (float)v5 * (float)((float)1.0 / (float)v4);
-    // KISAKFIX: IDA pseudocode `return *((float*)&v6 + 1)` is a hex-rays
-    // wrong-half-of-double artifact; the PPC tail was `fmr f1, f31` where
-    // f31 held the sqrt distance. On x86 the +1 cast reads bytes 4-7 of the
-    // IEEE-754 double = garbage. `pt->fOrigLength = Path_GetPathDir(...)`
-    // (called all over path build/rebuild) was getting random values, which
-    // corrupts path lookahead / trim / dodge distance accounting.
-    return (float)v4;
+
+	*delta = (float)(1.0 / fDist) * *delta;
+	delta[1] = (float)(1.0 / fDist) * delta[1];
+
+	return fDist;
 }
 
 pathnode_t *__cdecl Path_GetNegotiationNode(const path_t *pPath)
@@ -1223,11 +1216,79 @@ int __cdecl Path_DistanceGreaterThan(path_t *pPath, float fDist)
     return 0;
 }
 
+// USEBETTERLOOKAHEAD
+struct path_lookahead_momentum_t
+{
+    path_t *path;
+    int numIncreases;
+    int numReductions;
+};
+
+static path_lookahead_momentum_t s_pathMomentum[128];
+static int s_pathMomentumCount;
+
+static path_lookahead_momentum_t *Path_GetMomentum(path_t *pPath)
+{
+    int i;
+
+    for (i = 0; i < s_pathMomentumCount; ++i)
+    {
+        if (s_pathMomentum[i].path == pPath)
+            return &s_pathMomentum[i];
+    }
+
+    iassert(s_pathMomentumCount < ARRAY_COUNT(s_pathMomentum));
+    s_pathMomentum[s_pathMomentumCount].path = pPath;
+    s_pathMomentum[s_pathMomentumCount].numIncreases = 0;
+    s_pathMomentum[s_pathMomentumCount].numReductions = 0;
+    return &s_pathMomentum[s_pathMomentumCount++];
+}
+
+static void Path_ResetMomentum(path_t *pPath)
+{
+    path_lookahead_momentum_t *momentum;
+
+    momentum = Path_GetMomentum(pPath);
+    momentum->numIncreases = 0;
+    momentum->numReductions = 0;
+}
+
+static float Path_Pow_int(float x, int y)
+{
+    float z;
+    unsigned int n;
+
+    if (y < 0)
+        n = (unsigned int)(-y);
+    else
+        n = (unsigned int)y;
+
+    z = 1.0f;
+    while (n)
+    {
+        if (n & 1)
+            z = z * x;
+        n >>= 1;
+        if (n)
+            x = x * x;
+    }
+
+    return (y >= 0) ? z : (1.0f / z);
+}
+
+static const float momentumFactor = 1.5f;
+// USEBETTERLOOKAHEAD
+
 void __cdecl Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce)
 {
     int flags; // r10
     double v3; // fp0
     double v4; // fp0
+	path_lookahead_momentum_t *momentum;
+
+	momentum = Path_GetMomentum(pPath);
+	momentum->numIncreases = 0;
+	++momentum->numReductions;
 
     flags = pPath->flags;
     if ((flags & 2) != 0)
@@ -1248,18 +1309,20 @@ bool __cdecl Path_FailedLookahead(path_t *pPath)
 
 void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
 {
-    //pPath->numReductions = 0;
-    //++pPath->numIncreases;
+	float v3;
+	path_lookahead_momentum_t *momentum;
+
+	momentum = Path_GetMomentum(pPath);
+	momentum->numReductions = 0;
+	++momentum->numIncreases;
 
     pPath->fLookaheadAmount *= 1.1764705f;
 
-    // LWSS: this is not needed atm, it's some kind of lookahead exponential growth that pushes the amount further, much faster. 
-    // I'm guessing for moving straight across giant levels. (Notably disabled in Zombie mode)
-    //if (ai_useBetterLookahead->current.enabled && !zombiemode->current.enabled)
-    //{
-    //    v3 = _Pow_int<float>(momentumFactor, pPath->numIncreases - 1);
-    //    pPath->fLookaheadAmount = pPath->fLookaheadAmount * v3;
-    //}
+	if (ai_useBetterLookahead->current.enabled /*&& !zombiemode->current.enabled*/)
+	{
+		v3 = Path_Pow_int(momentumFactor, momentum->numIncreases - 1);
+		pPath->fLookaheadAmount = pPath->fLookaheadAmount * v3;
+	}
 
     pPath->fLookaheadAmount += 6.4f;
 
@@ -3404,7 +3467,7 @@ LABEL_28:
 
     if (ai_useBetterLookahead->current.enabled
         && bAllowRestore
-        && (prevLookaheadAmount > pPath->fLookaheadAmount || bNewIsForward)
+        && (prevLookaheadAmount > pPath->fLookaheadAmount || (pPath->fLookaheadAmount >= prevLookaheadAmount && bNewIsForward))
         && pPath->lookaheadNextNode <= pPath->wPathLen - 2
         && pPath->pts[pPath->lookaheadNextNode].fOrigLength >= pPath->fLookaheadDistToNextNode
         && pPath->wNegotiationStartNode <= 0
@@ -4192,6 +4255,7 @@ LABEL_18:
     pPath->eTeam = eTeam;
     fLookaheadAmount = pPath->fLookaheadAmount;
     pPath->iPathTime = level.time;
+	Path_ResetMomentum(pPath);
     if (fLookaheadAmount != 0.0)
     {
         if ((flags & 0x180) != 0)

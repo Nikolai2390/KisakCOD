@@ -245,91 +245,90 @@ LABEL_40:
 
 void __cdecl CG_VehicleHudRegisterDvars()
 {
-    // KISAKTODO: grab descriptions from the assembly (enjoy!)
     vehHudReticlePipOnAStickCenterCircle = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticlePipOnAStickCenterCircle",
         8.0,
         0.0099999998,
         10000.0,
         0,
-        0);
+        "The diameter of the small, center circle in the pip-on-a-stick reticle");
     vehHudReticlePipOnAStickMovingCircle = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticlePipOnAStickMovingCircle",
         32.0,
         0.0099999998,
         10000.0,
         0,
-        0);
+        "The diameter of the large, moving circle in the pip-on-a-stick reticle");
     vehHudReticlePipOnAStickCenterCircleBuffer = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticlePipOnAStickCenterCircleBuffer",
         0.25,
         -10000.0,
         10000.0,
         0,
-        0);
+        "Tweaks how close the stick is drawn to the center circle.  Positive numbers makes the line longer.");
     vehHudReticlePipOnAStickMovingCircleBuffer = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticlePipOnAStickMovingCircleBuffer",
         1.0,
         -10000.0,
         10000.0,
         0,
-        0);
-    vehHudLineWidth = Dvar_RegisterFloat("vehHudLineWidth", 8.0, 0.0099999998, 10000.0, 0, 0);
+        "Tweaks how close the stick is drawn to the moving circle.  Positive numbers makes the line longer.");
+    vehHudLineWidth = Dvar_RegisterFloat("vehHudLineWidth", 8.0, 0.0099999998, 10000.0, 0, "The width of the line used by code to draw elements on the vehicle HUD");
     vehHudDrawPipOnStickWhenFreelooking = (dvar_t *)Dvar_RegisterBool(
         "vehHudDrawPipOnStickWhenFreelooking",
         1,
         0,
         "Set to 0 to not draw the pip-on-a-stick reticle when the player is freelooking");
-    vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, 0, 0);
+    vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, DVAR_SAVED, "The width of the enemy target indicator on the hud.");
     vehHudTargetScreenEdgeClampBufferLeft = (dvar_t *)Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferLeft",
         0.0,
         -10000.0,
         10000.0,
-        0,
-        0);
+        DVAR_SAVED,
+        "The distance from the edge of the screen at which the enemy targets clamp.");
     vehHudTargetScreenEdgeClampBufferRight = (dvar_t *)Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferRight",
         0.0,
         -10000.0,
         10000.0,
-        0,
-        0);
+        DVAR_SAVED,
+        "The distance from the edge of the screen at which the enemy targets clamp.");
     vehHudTargetScreenEdgeClampBufferTop = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferTop",
         0.0,
         -10000.0,
         10000.0,
-        0,
-        0);
+        DVAR_SAVED,
+        "The distance from the edge of the screen at which the enemy targets clamp.");
     vehHudTargetScreenEdgeClampBufferBottom = (dvar_t *)Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferBottom",
         0.0,
         -10000.0,
         10000.0,
-        0,
-        0);
+        DVAR_SAVED,
+        "The distance from the edge of the screen at which the enemy targets clamp.");
     vehHudReticleBouncingDiamondSize = Dvar_RegisterFloat(
         "vehHudReticleBouncingDiamondSize",
         24.0,
         0.0,
         1000000.0,
         0,
-        0);
+        "The size of the bouncing diamond quad.");
     vehHudReticleBouncingRadius = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticleBouncingRadius",
         80.0,
         0.0,
         1000000.0,
         0,
-        0);
+        "The radius of the circle in which the diamond bounces.");
     vehHudReticleBouncingSpeed = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticleBouncingSpeed",
         400.0,
         0.0,
         1000000.0,
         0,
-        0);
+        "The rate at which the bouncing diamond moves");
 }
 
 int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float *outScreenPos)

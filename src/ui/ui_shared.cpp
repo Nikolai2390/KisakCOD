@@ -102,35 +102,38 @@ void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
     //if (String_Parse(v6, v9, 1024))
     //    Menu_ShowItemByName(dc->localClientNum, item->parent, v9, (uint8_t)v8);
 
-    char parsedName[1024];
-#ifdef KISAK_XBOX
-    int saveExists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
-#else
-    int saveExists = sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string);
-#endif
-    int shouldHide = !saveExists;  // 1 if save does not exist, 0 otherwise
+	const char *saveName;
+	bool saveExists;
+	char parsedName[1024];
 
-    if (String_Parse(args, parsedName, sizeof(parsedName))) {
-        Menu_ShowItemByName(dc->localClientNum, item->parent, parsedName, (unsigned char)shouldHide);
-    }
+#ifdef KISAK_XBOX
+	saveName = CONSOLE_DEFAULT_SAVE_NAME;
+#else
+	saveName = sv_lastSaveGame->current.string;
+#endif
+
+	saveExists = SaveExists(saveName);
+	if (String_Parse(args, parsedName, 1024))
+		Menu_ShowItemByName(dc->localClientNum, item->parent, parsedName, !saveExists);
 }
+
 void Script_SaveGameShow(UiContext *dc, itemDef_s *item, const char **args)
 {
-    const char **v6; // r3
-    int v7; // r11
-    bool v8; // r31
-    char v9[1056]; // [sp+50h] [-420h] BYREF
+	const char *saveName;
+	bool saveExists;
+	char parsedName[1024];
 
 #ifdef KISAK_XBOX
-    v7 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME) - 1;
+	saveName = CONSOLE_DEFAULT_SAVE_NAME;
 #else
-    v7 = (sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string)) - 1;
+	saveName = sv_lastSaveGame->current.string;
 #endif
-    v6 = args;
-    v8 = v7 == 0;
-    if (String_Parse(v6, v9, 1024))
-        Menu_ShowItemByName(dc->localClientNum, item->parent, v9, v8);
+
+	saveExists = SaveExists(saveName);
+	if (String_Parse(args, parsedName, 1024))
+		Menu_ShowItemByName(dc->localClientNum, item->parent, parsedName, saveExists);
 }
+
 void Script_ProfileHide(UiContext *dc, itemDef_s *item, const char **args)
 {
     //int v6; // r3

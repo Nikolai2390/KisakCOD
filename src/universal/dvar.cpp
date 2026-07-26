@@ -2295,7 +2295,7 @@ const dvar_s *__cdecl Dvar_RegisterColor(
     else
         v8 = 0.0;
     dvarValue.color[3] = SnapFloatToInt(v8 * 255.0f);
-    dvarValue.enabled = SnapFloatToInt(v17 * 255.0f);
+    dvarValue.color[0] = SnapFloatToInt(v17 * 255.0f);// dvarValue.enabled
     dvarValue.color[1] = SnapFloatToInt(v14 * 255.0f);
     dvarValue.color[2] = SnapFloatToInt(v11 * 255.0f);
     return Dvar_RegisterVariant(dvarName, DVAR_TYPE_COLOR, flags, dvarValue, 0, description);
