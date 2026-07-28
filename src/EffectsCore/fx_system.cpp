@@ -896,7 +896,7 @@ FxEffect *__cdecl FX_SpawnOrientedEffect(
     system = FX_GetSystem(localClientNum);
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1323, 0, "%s", "system");
-    return FX_SpawnEffect(system, def, msecBegin, origin, axis, 4095, 2047, 255, 0xFFFFu, markEntnum);
+    return FX_SpawnEffect(system, def, msecBegin, origin, axis, FX_DOBJ_HANDLE_NONE, FX_BONE_INDEX_NONE, 255, 0xFFFFu, markEntnum);
 }
 
 void __cdecl FX_AssertAllocatedEffect(int32_t localClientNum, FxEffect *effect)
@@ -939,7 +939,7 @@ void __cdecl FX_PlayOrientedEffect(
     FxSystem *system; // [esp+8h] [ebp-4h]
 
     system = FX_GetSystem(localClientNum);
-    effect = FX_SpawnOrientedEffect(localClientNum, def, startMsec, origin, axis, 0x3FFu);
+    effect = FX_SpawnOrientedEffect(localClientNum, def, startMsec, origin, axis, ENTITYNUM_NONE);
     if (effect)
         FX_DelRefToEffect(system, effect);
 }
@@ -965,8 +965,8 @@ FxEffect *__cdecl FX_SpawnBoltedEffect(
     }
     else
     {
-        dobjHandle = 4095;
-        boneIndex = 2047;
+		dobjHandle = FX_DOBJ_HANDLE_NONE;
+		boneIndex = FX_BONE_INDEX_NONE;
     }
     system = FX_GetSystem(localClientNum);
     return FX_SpawnEffect(system, def, msecBegin, orient.origin, orient.axis, dobjHandle, boneIndex, 255, -1, ENTITYNUM_NONE);
@@ -1582,7 +1582,7 @@ void __cdecl FX_SpawnElem(
             FX_SpawnRunner(system, effect, elemDef, effectFrameWhenPlayed, randomSeed, msecBegin);
             break;
         case 9u:
-            if (effect->boltAndSortOrder.boneIndex != 0x7FF || effect->boltAndSortOrder.dobjHandle == 0xFFF)
+            if (effect->boltAndSortOrder.boneIndex != FX_BONE_INDEX_NONE || effect->boltAndSortOrder.dobjHandle == FX_DOBJ_HANDLE_NONE)
             {
                 FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, ENTITYNUM_NONE);
             }
@@ -1737,17 +1737,17 @@ void __cdecl FX_SpawnRunner(
         v6 = sortOrder;
     else
         v6 = 0;
-    if (effect->boltAndSortOrder.boneIndex == 0x7FF)
+    if (effect->boltAndSortOrder.boneIndex == FX_BONE_INDEX_NONE)
     {
-        if (effect->boltAndSortOrder.dobjHandle == 0xFFF)
+        if (effect->boltAndSortOrder.dobjHandle == FX_DOBJ_HANDLE_NONE)
             spawnedEffect = FX_SpawnEffect(
                 system,
                 effectDef,
                 msecWhenPlayed,
                 spawnOrigin,
                 (const float (*)[3])usedAxis,
-                4095,
-                2047,
+				FX_DOBJ_HANDLE_NONE,
+				FX_BONE_INDEX_NONE,
                 v6,
                 effect->owner,
                 ENTITYNUM_NONE);
@@ -1758,8 +1758,8 @@ void __cdecl FX_SpawnRunner(
                 msecWhenPlayed,
                 spawnOrigin,
                 (const float (*)[3])usedAxis,
-                4095,
-                2047,
+				FX_DOBJ_HANDLE_NONE,
+				FX_BONE_INDEX_NONE,
                 v6,
                 effect->owner,
                 effect->boltAndSortOrder.dobjHandle);

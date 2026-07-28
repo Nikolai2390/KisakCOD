@@ -505,6 +505,9 @@ uint32_t __cdecl ValidLatestPrimaryWeapIdx(uint32_t weaponIndex);
 void __cdecl CG_SelectWeaponIndex(int32_t localClientNum, uint32_t weaponIndex);
 char __cdecl CG_ScopeIsOverlayed(int32_t localClientNum);
 int32_t __cdecl CG_PlayerTurretWeaponIdx(int32_t localClientNum);
+#ifdef KISAK_SP
+int32_t __cdecl CG_PlayerVehicleWeaponIdx(int32_t localClientNum);
+#endif
 bool __cdecl CG_PlayerUsingScopedTurret(int32_t localClientNum);
 void CG_DisplayViewmodelAnim(int localClientNum);
 char __cdecl Bullet_Trace(

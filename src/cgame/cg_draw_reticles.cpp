@@ -162,8 +162,26 @@ void __cdecl CG_DrawCrosshair(int32_t localClientNum)
                 CG_DrawTurretCrossHair(localClientNum);
             }
         }
+#ifdef KISAK_SP
+		else if ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0)
+		{
+			weapIndex = CG_PlayerVehicleWeaponIdx(localClientNum);
+			if (weapIndex && (weapDefTurret = BG_GetWeaponDef(weapIndex), weapDefTurret->overlayMaterial))
+			{
+				CG_DrawAdsOverlay(localClientNum, weapDefTurret, colorWhite, vec2_origin);
+			}
+			else if (!CG_Flashbanged(localClientNum) && drawHud && ps->viewlocked_entNum != ENTITYNUM_NONE)
+			{
+				CG_DrawTurretCrossHair(localClientNum);
+			}
+		}
+#endif
         else
         {
+#ifdef KISAK_SP
+			if ((ps->weapFlags & 0x80) != 0)
+				return;
+#endif
             weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
             if (weapIndex)
             {
@@ -566,7 +584,11 @@ void __cdecl CG_DrawTurretCrossHair(int32_t localClientNum)
         iassert(cgameGlob->predictedPlayerState.viewlocked_entNum != ENTITYNUM_NONE);
 
         cent = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
-        iassert(cent->nextState.eType == ET_MG42);
+#ifdef KISAK_MP
+		iassert(cent->nextState.eType == ET_MG42);
+#elif KISAK_SP
+		iassert(cent->nextState.eType == ET_MG42 || cent->nextState.eType == ET_VEHICLE);
+#endif
         weapIndex = cent->nextState.weapon;
         if (weapIndex)
         {

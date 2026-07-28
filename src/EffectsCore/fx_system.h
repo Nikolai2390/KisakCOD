@@ -42,7 +42,11 @@ enum $390C8AB619C5D27F330E671BCD9D689E : int32_t
     FX_ELEM_TYPE_LAST_DRAWN = 0x7,
 };
 
+#ifdef KISAK_MP
 #define FX_BONE_INDEX_NONE 2047
+#else
+#define FX_BONE_INDEX_NONE 1023
+#endif
 #define FX_DOBJ_HANDLE_NONE 4095
 
 void __cdecl TRACK_fx_system();

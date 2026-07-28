@@ -4047,6 +4047,29 @@ char __cdecl CG_ScopeIsOverlayed(int32_t localClientNum)
     return CG_GetWeapReticleZoom(CG_GetLocalClientGlobals(localClientNum), &zoom);
 }
 
+#ifdef KISAK_SP
+int32_t __cdecl CG_PlayerVehicleWeaponIdx(int32_t localClientNum)
+{
+    cg_s *cgameGlob;
+    centity_s *cent;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0)
+        return 0;
+    if ((cgameGlob->predictedPlayerState.eFlags & 0x80000) != 0)
+        return 0;
+    if (cgameGlob->predictedPlayerState.viewlocked_entNum == ENTITYNUM_NONE)
+        return 0;
+
+    cent = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
+    if (cent->nextState.eType != ET_VEHICLE)
+        return 0;
+
+    return cent->nextState.weapon;
+}
+#endif
+
 int32_t __cdecl CG_PlayerTurretWeaponIdx(int32_t localClientNum)
 {
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
