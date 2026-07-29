@@ -1837,8 +1837,8 @@ uint8_t __cdecl FX_ProcessEmitting(
             msecAtSpawn,
             frameElemNow.origin,
             axisSpawn,
-			FX_DOBJ_HANDLE_NONE,
-			FX_BONE_INDEX_NONE,
+            FX_DOBJ_HANDLE_NONE,
+            FX_BONE_INDEX_NONE,
             255,
             update->effect->owner,
             ENTITYNUM_NONE);
