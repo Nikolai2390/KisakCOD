@@ -1473,14 +1473,19 @@ void __cdecl ODE_Init()
 
 dxBody *dBodyCreate(dxWorld *w)
 {
+	dxBody *b;
+
     dAASSERT(w);
 #ifdef USE_POOL_ALLOCATOR
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-    dxBody *b = (dxBody *)Pool_Alloc(&odeGlob.bodyPool);
+	b = (dxBody *)Pool_Alloc(&odeGlob.bodyPool);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
 #else
-    dxBody *b = new dxBody;
+	b = new dxBody;
 #endif
+
+	if (!b)// Fix for initObject(b, w); exception.
+		return 0;
 
     initObject(b, w);
     b->firstjoint = 0;

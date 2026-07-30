@@ -1147,6 +1147,8 @@ char __cdecl DynEntCl_DynEntImpactEvent(
 #ifdef KISAK_MP
     if (!sv_clientSideBullets->current.enabled)
         DynEntCl_TestPhysicsEntities(localClientNum, sourceEntityNum, start, end, isMelee);
+#elif KISAK_SP
+	DynEntCl_TestPhysicsEntities(localClientNum, sourceEntityNum, start, end, isMelee);
 #endif
     memset((uint8_t *)&trace, 0, sizeof(trace));
     trace.fraction = 1.0;

@@ -1483,6 +1483,7 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
         if (Phys_DoBodyOncePerFrame(worldIndex, bodyIter, seconds))
             ++bodyEnableCount;
     }
+#ifdef KISAK_MP
     v4 = (double)(bodyEnableCount - 32) / 18.0;
     v3 = v4 - 1.0;
     if (v3 < 0.0)
@@ -1496,6 +1497,9 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
         v1 = 0.0;
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
         + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
+#elif KISAK_SP
+	g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex];
+#endif
         ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
 }
 

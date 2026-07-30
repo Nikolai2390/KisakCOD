@@ -2511,7 +2511,7 @@ void __cdecl CG_FireWeapon(
             }
 
 #ifdef KISAK_SP
-            if (p_nextState->eType == ET_ACTOR)
+            if (p_nextState->eType == ET_ACTOR || p_nextState->eType == ET_VEHICLE)
                 WeaponFlash(localClientNum, p_nextState->number, weapon, 0, tagName);
 #endif
 
