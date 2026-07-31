@@ -42,7 +42,7 @@ if (WIN32)
 
     # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
-    set(DXSDK_LIB_DIR ${DXSDK_DIR}/${CMAKE_BUILD_TYPE}/lib/x86)
+    set(DXSDK_LIB_DIR ${DXSDK_DIR}/release/lib/x86)
     message("DXSDK_LIB_DIR: ${DXSDK_LIB_DIR}")
   else()
     message("===== BUILDING FOR LOCAL DXSDK =====")
@@ -50,13 +50,6 @@ if (WIN32)
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
   endif() # DEFINED CICD
-  
-  # Set the required library
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(D3DX_LIB d3dx9d.lib)
-  else()
-    set(D3DX_LIB d3dx9.lib)
-  endif() # CMAKE_BUILD_TYPE Debug
 
 endif() # WIN32
 
@@ -74,6 +67,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/binklib")
 target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/DEBUG>")
 target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:REF>")
 target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")
+target_link_directories(${PROJECT_NAME} PUBLIC ${DXSDK_DIR}/debug/lib/x86)
 
 target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -81,7 +75,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 target_link_libraries(${PROJECT_NAME} PUBLIC
         mss32.lib
         dsound.lib
-        ${D3DX_LIB}
+		$<$<CONFIG:Debug>:d3dx9d.lib>
+		$<$<NOT:$<CONFIG:Debug>>:d3dx9.lib>
         d3d9.lib
         ddraw.lib
         ws2_32.lib

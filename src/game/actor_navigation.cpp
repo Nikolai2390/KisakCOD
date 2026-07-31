@@ -1318,11 +1318,13 @@ void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
 
     pPath->fLookaheadAmount *= 1.1764705f;
 
-	if (ai_useBetterLookahead->current.enabled /*&& !zombiemode->current.enabled*/)
+/*
+	if (ai_useBetterLookahead->current.enabled && !zombiemode->current.enabled)
 	{
 		v3 = Path_Pow_int(momentumFactor, momentum->numIncreases - 1);
 		pPath->fLookaheadAmount = pPath->fLookaheadAmount * v3;
 	}
+*/
 
     pPath->fLookaheadAmount += 6.4f;
 
